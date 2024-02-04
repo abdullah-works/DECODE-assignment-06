@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BulbScreen extends StatefulWidget {
   const BulbScreen({super.key});
@@ -9,6 +10,33 @@ class BulbScreen extends StatefulWidget {
 
 class _BulbScreenState extends State<BulbScreen> {
   bool _switchOn = false;
+
+  @override
+  void initState() {
+    readStoredState();
+    super.initState();
+  }
+
+  readStoredState() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    _switchOn = prefs.getBool('SWITCH') ?? false;
+    setState(() {});
+  }
+
+  void _switchBulb(bool value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('SWITCH', value);
+
+    // The 'value' is already inverse of whatever is passed earlier in the Switch value.
+    // So, we will just use this and discard the below conversion.
+    // _switchOn = !_switchOn!;
+
+    // _switchOn = prefs.getBool('SWITCH') ?? false;
+    // Since, I know some value will be assigned, so will use the below statement.
+    _switchOn = prefs.getBool('SWITCH')!;
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +73,9 @@ class _BulbScreenState extends State<BulbScreen> {
                   ),
                   const SizedBox(height: 20),
                   Switch(
-                      value: _switchOn,
-                      onChanged: (value) {
-                        setState(() {
-                          _switchOn = value;
-                        });
-                      }),
+                    value: _switchOn,
+                    onChanged: _switchBulb,
+                  ),
                 ],
               ),
             ),
